@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineVault – Create Account</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-nav">
+    <div class="nav-logo">CINEVAULT</div>
+  </div>
+
+  <div class="auth-center">
+    <div class="auth-card">
+      <h1>Create Account</h1>
+
+      {% if error %}
+      <div class="auth-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('register') }}">
+
+        <div class="auth-field">
+          <input type="text" name="username" id="u"
+                 placeholder=" " autocomplete="username"
+                 required minlength="3">
+          <label for="u">Username (min 3 chars)</label>
+        </div>
+
+        <div class="auth-field">
+          <input type="password" name="password" id="p"
+                 placeholder=" " autocomplete="new-password"
+                 required minlength="6">
+          <label for="p">Password (min 6 chars)</label>
+        </div>
+
+        <button type="submit" class="btn-auth">Create Account</button>
+      </form>
+
+      <p class="auth-footer">
+        Already have an account? <a href="{{ url_for('login') }}">Sign in.</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

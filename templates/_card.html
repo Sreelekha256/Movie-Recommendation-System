@@ -1,0 +1,33 @@
+{#  Reusable movie card for carousel rows.
+    Uses data-* attributes to avoid all quote-clashing issues. #}
+<div class="movie-card"
+     data-poster="{{ movie.poster }}"
+     data-title="{{ movie.title }}"
+     data-rating="{{ movie.rating }}"
+     data-year="{{ movie.year }}"
+     data-runtime="{{ movie.runtime }}"
+     data-genres="{{ movie.genres | join(',') }}"
+     data-plot="{{ movie.plot | truncate(300) }}"
+     data-trailer="{{ movie.trailer_url }}">
+
+  <div class="card-inner">
+    <img class="card-poster"
+         src="{{ movie.poster }}"
+         alt="{{ movie.title }}"
+         loading="lazy"
+         onerror="this.src='https://placehold.co/190x280/141414/555?text=No+Image'">
+  </div>
+
+  <div class="card-info">
+    <div class="card-title">{{ movie.title }}</div>
+    <div class="card-meta">
+      <span class="green">&#11088; {{ movie.rating }}</span>
+      <span>{{ movie.year }}</span>
+    </div>
+    <div class="card-desc">{{ movie.plot | truncate(85) }}</div>
+    <div class="card-btns">
+      <button class="btn-card-info"   onclick="openModalFromCard(this.closest('.movie-card'))">&#9432; Info</button>
+      <a      class="btn-card-trailer" href="{{ movie.trailer_url }}" target="_blank" rel="noopener">&#9654; Trailer</a>
+    </div>
+  </div>
+</div>

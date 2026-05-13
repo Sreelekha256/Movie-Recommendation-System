@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}CineVault - Because you watched {{ selected_movie }}{% endblock %}
+
+{% block content %}
+
+<!-- HERO: the searched movie -->
+{% if hero %}
+<section class="hero" style="background-image: url('{{ hero.poster }}');"
+  data-poster="{{ hero.poster }}"
+  data-title="{{ selected_movie }}"
+  data-rating="{{ hero.rating }}"
+  data-year="{{ hero.year }}"
+  data-runtime="{{ hero.runtime }}"
+  data-genres="{{ hero.genres | join(',') }}"
+  data-plot="{{ hero.plot | truncate(400) }}"
+  data-trailer="{{ hero.trailer_url }}">
+
+  <div class="hero-content">
+    <div class="hero-badge">&#127919; Because You Searched</div>
+    <h1 class="hero-title">{{ selected_movie }}</h1>
+
+    <div class="hero-meta">
+      <span class="green">&#11088; {{ hero.rating }}</span>
+      <span class="dot">&bull;</span>
+      <span>{{ hero.year }}</span>
+      {% if hero.runtime %}
+      <span class="dot">&bull;</span>
+      <span>{{ hero.runtime }} min</span>
+      {% endif %}
+    </div>
+
+    {% if hero.genres %}
+    <div class="hero-genres">
+      {% for g in hero.genres %}
+      <span class="hero-genre">{{ g }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <p class="hero-desc">{{ hero.plot }}</p>
+
+    <div class="hero-btns">
+      <button class="btn-play" onclick="openModalFromCard(this.closest('.hero'))">
+        &#9432; More Info
+      </button>
+      <a class="btn-yt" href="{{ hero.trailer_url }}" target="_blank" rel="noopener">
+        &#9654; Watch Trailer
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- RECOMMENDATIONS GRID -->
+<div class="content-area">
+  <div class="rec-header">
+    <h2>Movies Like</h2>
+    <h1>{{ selected_movie }}</h1>
+    <p>{{ results | length }} recommendations found</p>
+  </div>
+
+  {% if results %}
+  <div class="rec-grid">
+    {% for movie in results %}
+    <div class="rec-card"
+         data-poster="{{ movie.poster }}"
+         data-title="{{ movie.title }}"
+         data-rating="{{ movie.rating }}"
+         data-year="{{ movie.year }}"
+         data-runtime="{{ movie.runtime }}"
+         data-genres="{{ movie.genres | join(',') }}"
+         data-plot="{{ movie.plot | truncate(300) }}"
+         data-trailer="{{ movie.trailer_url }}">
+
+      <img src="{{ movie.poster }}"
+           alt="{{ movie.title }}"
+           loading="lazy"
+           onerror="this.src='https://placehold.co/200x300/141414/555?text=No+Image'">
+
+      <div class="rec-card-body">
+        <div class="rec-card-title">{{ movie.title }}</div>
+        <div class="rec-card-meta">
+          <span class="green">&#11088; {{ movie.rating }}</span>
+          <span>{{ movie.year }}</span>
+        </div>
+
+        <button class="btn-rec-info"
+          onclick="openModalFromCard(this.closest('.rec-card'))">
+          &#9432; More Info
+        </button>
+
+        <a class="btn-rec-trailer"
+           href="{{ movie.trailer_url }}"
+           target="_blank" rel="noopener">
+          &#9654; Watch Trailer
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <h3>No recommendations found</h3>
+    <p>Try searching for a different movie from the dropdown above.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

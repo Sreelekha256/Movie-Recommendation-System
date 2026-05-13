@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CineVault{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════════ -->
+<nav id="mainNav">
+  <div class="nav-logo">CINEVAULT</div>
+
+  <div class="nav-center">
+    <a href="{{ url_for('home') }}"
+       {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a>
+    <a href="{{ url_for('trending') }}"
+       {% if request.endpoint == 'trending' %}class="active"{% endif %}>Trending</a>
+  </div>
+
+  <div class="nav-right">
+    <form method="POST" action="{{ url_for('recommend_movies') }}"
+          style="display:flex; gap:6px; align-items:center;">
+      <select name="movie" required>
+        <option value="" disabled selected>🔍 Search a movie...</option>
+        {% for m in all_movies %}
+        <option value="{{ m }}">{{ m }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-red">Get Recs</button>
+    </form>
+
+    <div class="nav-avatar">{{ username[0].upper() }}</div>
+    <a href="{{ url_for('logout') }}" class="btn-signout">Sign Out</a>
+  </div>
+</nav>
+
+<!-- ── PAGE CONTENT ──────────────────────────────────────── -->
+{% block content %}{% endblock %}
+
+<!-- ══════════════════════════════════════════════════════════
+     INFO MODAL  (shows movie details + YouTube trailer link)
+══════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="infoModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-poster-wrap">
+      <img id="modalPoster" src="" alt="">
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-title"  id="modalTitle"></div>
+      <div class="modal-meta">
+        <span class="green"     id="modalRating"></span>
+        <span                   id="modalYear"></span>
+        <span                   id="modalRuntime"></span>
+      </div>
+      <div class="modal-genres" id="modalGenres"></div>
+      <div class="modal-desc"   id="modalDesc"></div>
+
+      <!-- Clicking this opens YouTube search for the trailer -->
+      <a id="modalTrailerBtn" href="#" target="_blank" rel="noopener" class="btn-modal-yt">
+        ▶&nbsp; Watch Trailer on YouTube
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHARED JAVASCRIPT ─────────────────────────────────── -->
+<script>
+  // Navbar scroll effect
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav && nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // ── Open info modal ─────────────────────────────────────
+  function openModal(poster, title, rating, year, runtime, genres, plot, trailerUrl) {
+    document.getElementById('modalPoster').src          = poster      || '';
+    document.getElementById('modalTitle').textContent   = title       || '';
+    document.getElementById('modalRating').textContent  = rating && rating !== 'N/A' ? '⭐ ' + rating : '';
+    document.getElementById('modalYear').textContent    = year        || '';
+    document.getElementById('modalRuntime').textContent = runtime     ? runtime + ' min' : '';
+    document.getElementById('modalDesc').textContent    = plot        || '';
+    document.getElementById('modalTrailerBtn').href     = trailerUrl  || '#';
+
+    // Genres
+    const genreEl = document.getElementById('modalGenres');
+    genreEl.innerHTML = '';
+    if (genres) {
+      let list = genres;
+      if (typeof genres === 'string') {
+        try { list = JSON.parse(genres); } catch(e) { list = genres.split(','); }
+      }
+      list.forEach(g => {
+        const t = (g || '').trim();
+        if (t) genreEl.innerHTML += `<span class="modal-genre">${t}</span>`;
+      });
+    }
+
+    document.getElementById('infoModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // ── Close modal ─────────────────────────────────────────
+  function closeModal() {
+    document.getElementById('infoModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Close on backdrop click
+  document.getElementById('infoModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ── Carousel scroll ─────────────────────────────────────
+  function scrollRow(id, dir) {
+    const el = document.getElementById(id);
+    if (el) el.scrollBy({ left: dir * 620, behavior: 'smooth' });
+  }
+
+  // ── Open modal using data-* attributes (no quote issues) ─
+  function openModalFromCard(card) {
+    if (!card) return;
+    openModal(
+      card.dataset.poster,
+      card.dataset.title,
+      card.dataset.rating,
+      card.dataset.year,
+      card.dataset.runtime,
+      card.dataset.genres,
+      card.dataset.plot,
+      card.dataset.trailer
+    );
+  }
+</script>
+
+{% block scripts %}{% endblock %}
+
+  <!-- ✋ Hand Gesture Controller -->
+  <script src="{{ url_for('static', filename='gesture.js') }}" defer></script>
+</body>
+</html>
